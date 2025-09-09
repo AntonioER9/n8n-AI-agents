@@ -1,0 +1,234 @@
+{
+  "name": "Agente_RAG",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "a0e3012e-ab47-4aad-93f6-ea5966ee377a",
+      "name": "When chat message received",
+      "webhookId": "bf6bc2c4-bfb9-4150-88b7-6daf0e1ec516"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=#Rol\nEres un asistente capaz de contestar preguntas del usuario basándote solo en información de la herramienta Ecommerce\n\n#Tareas\n- Tu función principal es responder a este mensaje {{ $json.chatInput }}\n\n- Utiliza información de la herramienta Ecommerce\n\n#Notas\n- Tus respuestas deben ser claras y concisas, no debes exceder los 200 caracteres",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        220,
+        0
+      ],
+      "id": "68e73e6f-801d-4865-bbe4-68251afd82d4",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.1,
+      "position": [
+        -20,
+        220
+      ],
+      "id": "2b32f2a5-c636-4065-9127-c54f151eba10",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "I0JGHRe0IK4lwZR3",
+          "name": "OpenAi account 2"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        240,
+        180
+      ],
+      "id": "dee44ae4-d679-41bc-b41a-8847b04b9c68",
+      "name": "Window Buffer Memory"
+    },
+    {
+      "parameters": {
+        "pineconeIndex": {
+          "__rl": true,
+          "value": "ecommerce",
+          "mode": "list",
+          "cachedResultName": "ecommerce"
+        },
+        "options": {
+          "pineconeNamespace": "namespaceecommerce"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
+      "typeVersion": 1,
+      "position": [
+        460,
+        300
+      ],
+      "id": "40108771-5c83-49e0-aca1-29cdcf5eaad9",
+      "name": "Pinecone Vector Store",
+      "credentials": {
+        "pineconeApi": {
+          "id": "t5R5sDYBwSFtSGCo",
+          "name": "PineconeApi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        380,
+        420
+      ],
+      "id": "3c712a53-531b-4ff1-b98e-72a66599b947",
+      "name": "Embeddings OpenAI",
+      "credentials": {
+        "openAiApi": {
+          "id": "I0JGHRe0IK4lwZR3",
+          "name": "OpenAi account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.1,
+      "position": [
+        820,
+        260
+      ],
+      "id": "4bd6a347-c040-4371-b9e8-b1bd646862f6",
+      "name": "OpenAI Chat Model1",
+      "credentials": {
+        "openAiApi": {
+          "id": "I0JGHRe0IK4lwZR3",
+          "name": "OpenAi account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "name": "Ecommerce",
+        "description": "Esta herramienta va a dar información sobre el Ecommerce"
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolVectorStore",
+      "typeVersion": 1,
+      "position": [
+        540,
+        160
+      ],
+      "id": "e41985da-944e-4e5d-8c5e-d58fdc68af10",
+      "name": "Ecommerce"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Window Buffer Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pinecone Vector Store": {
+      "ai_vectorStore": [
+        [
+          {
+            "node": "Ecommerce",
+            "type": "ai_vectorStore",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings OpenAI": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Pinecone Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Ecommerce",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ecommerce": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "6c2cb4ed-7ae8-4e92-9d88-842a73431aae",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "e4fdb4e0168a7f4d35dba69787a6a0f975f7036521581508c5244ad600860eff"
+  },
+  "id": "D1gKY2MyCDqKzzK6",
+  "tags": []
+}
