@@ -1,0 +1,162 @@
+{
+  "name": "Telegram",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -160,
+        0
+      ],
+      "id": "58ddadf1-6b8c-4c7d-837d-25329b7eb4b1",
+      "name": "Telegram Trigger",
+      "webhookId": "e204c0b3-e666-417d-b866-d845d07ee936",
+      "credentials": {
+        "telegramApi": {
+          "id": "qD7inI4z2k8NbOv0",
+          "name": "Telegram account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "={{ $json.output }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        580,
+        0
+      ],
+      "id": "a87f4b52-7f3f-47c1-b764-56665212a12e",
+      "name": "Telegram",
+      "credentials": {
+        "telegramApi": {
+          "id": "qD7inI4z2k8NbOv0",
+          "name": "Telegram account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Tu función principal es responder a este mensaje: {{ $json.message.text }} con menos de 200 carácteres",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        140,
+        0
+      ],
+      "id": "e7fba938-2c4a-43e7-beff-7f01842ee1f6",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $json.message.chat.id }}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        140,
+        200
+      ],
+      "id": "d514211a-b60d-4a05-83bc-7fca2c0b6ede",
+      "name": "Window Buffer Memory"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -60,
+        220
+      ],
+      "id": "6cf644d3-fd92-461f-9916-eb452ca83fa8",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "bS93bSDo9U6XRIgk",
+          "name": "OpenAi account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Telegram",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Window Buffer Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "7cc18bde-1e21-433f-8505-330f52816c30",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "e8f910a32e384a3536c69778f67a53914ab342e9eb6a39780aac0230b64242c7"
+  },
+  "id": "4Rqv7EzBaax6a5lP",
+  "tags": []
+}
