@@ -1,0 +1,436 @@
+{
+  "name": "Coworking_Agent",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -300,
+        -40
+      ],
+      "id": "e4bcc0ee-c6c4-46db-a761-3ab2a5b9b54c",
+      "name": "When chat message received",
+      "webhookId": "5dce2264-1212-494d-8692-f22c18f4d97a"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=#Rol\nEres un asistente capaz de contestar preguntas frecuentes sobre un coworking.\n\n##Tareas\n- Tu función principal es responder a este mensaje {{ $json.chatInput }}\n- Utiliza información de la herramienta Coworking en caso de que se requiera de esa información\n- Puedes consultar detalles de los eventos disponibles cuando te lo pidan\n- Puedes obtener más detalles del usuario si le pides su email\n- Puedes reservar eventos teniendo en cuenta la fecha actual {{ $now }}.\n\n##Notas\n- Tus respuestas deben ser claras y concisas, no debes exceder los 200 caracteres\n- Para poder reservar necesitarás el IDMiembro y el IDEvento que podrás obtener de las herramientas BuscarEvento y BuscarMiembro.\n- Evita volver a preguntar por el email al usuario si ya lo tienes en la memoria de la conversación",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        -80,
+        -40
+      ],
+      "id": "a457481b-1ce2-49d3-8d7e-c942eb25d5ff",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.1,
+      "position": [
+        -300,
+        160
+      ],
+      "id": "949a3a92-1d6b-459a-9b1f-d32403736c65",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "I0JGHRe0IK4lwZR3",
+          "name": "OpenAi account 2"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        -160,
+        160
+      ],
+      "id": "01f471cf-f612-4ea4-a04a-bb57ffd8d732",
+      "name": "Window Buffer Memory"
+    },
+    {
+      "parameters": {
+        "pineconeIndex": {
+          "__rl": true,
+          "value": "coworking",
+          "mode": "list",
+          "cachedResultName": "coworking"
+        },
+        "options": {
+          "pineconeNamespace": "coworking_namespace"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
+      "typeVersion": 1,
+      "position": [
+        340,
+        280
+      ],
+      "id": "f4b26866-34ce-4402-9969-ef604ba9698a",
+      "name": "Pinecone Vector Store",
+      "credentials": {
+        "pineconeApi": {
+          "id": "t5R5sDYBwSFtSGCo",
+          "name": "PineconeApi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        380,
+        440
+      ],
+      "id": "470548fb-e44c-418a-8e4b-b49e29ddf2bb",
+      "name": "Embeddings OpenAI",
+      "credentials": {
+        "openAiApi": {
+          "id": "I0JGHRe0IK4lwZR3",
+          "name": "OpenAi account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.1,
+      "position": [
+        640,
+        300
+      ],
+      "id": "70f1fb16-f70b-494e-aba1-8b76fcde180b",
+      "name": "OpenAI Chat Model1",
+      "credentials": {
+        "openAiApi": {
+          "id": "I0JGHRe0IK4lwZR3",
+          "name": "OpenAi account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "name": "Coworking",
+        "description": "Esta herramienta va a darte información sobre el coworking"
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolVectorStore",
+      "typeVersion": 1,
+      "position": [
+        460,
+        100
+      ],
+      "id": "4eda4401-7ee1-4e4f-8a73-6e8d111c640c",
+      "name": "Coworking"
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Llama a este módulo para obtener información sobre el usuario cuando tengas la dirección de correo electrónico del usuario",
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "value": "appudbWAZ5rxdqAe4",
+          "mode": "list",
+          "cachedResultName": "Coworking",
+          "cachedResultUrl": "https://airtable.com/appudbWAZ5rxdqAe4"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblySiqQ4JdLK0hQW",
+          "mode": "list",
+          "cachedResultName": "Miembros",
+          "cachedResultUrl": "https://airtable.com/appudbWAZ5rxdqAe4/tblySiqQ4JdLK0hQW"
+        },
+        "filterByFormula": "={Email} = \"{{ $fromAI(\"email\", \"la dirección de email del usuario\") }}\"",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtableTool",
+      "typeVersion": 2.1,
+      "position": [
+        -20,
+        260
+      ],
+      "id": "9377a15d-8543-4056-b9f8-46f0a8b27504",
+      "name": "BuscarMiembro",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "BbDSrWUj35Cd9sTm",
+          "name": "Airtable NameJob"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Llama a este módulo para encontrar información sobre los eventos según el tipo de evento",
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "value": "appudbWAZ5rxdqAe4",
+          "mode": "list",
+          "cachedResultName": "Coworking",
+          "cachedResultUrl": "https://airtable.com/appudbWAZ5rxdqAe4"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblJkgXvcrRW6HKxD",
+          "mode": "list",
+          "cachedResultName": "Eventos",
+          "cachedResultUrl": "https://airtable.com/appudbWAZ5rxdqAe4/tblJkgXvcrRW6HKxD"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtableTool",
+      "typeVersion": 2.1,
+      "position": [
+        120,
+        200
+      ],
+      "id": "e8173bf9-c685-4ba4-81f5-940fc345034c",
+      "name": "BuscarEvento",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "BbDSrWUj35Cd9sTm",
+          "name": "Airtable NameJob"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "SOLO llama a esta herramienta cuando tengas el ID del evento y el ID del miembro. Esto agregará el miembro al evento.",
+        "operation": "update",
+        "base": {
+          "__rl": true,
+          "value": "appudbWAZ5rxdqAe4",
+          "mode": "list",
+          "cachedResultName": "Coworking",
+          "cachedResultUrl": "https://airtable.com/appudbWAZ5rxdqAe4"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblJkgXvcrRW6HKxD",
+          "mode": "list",
+          "cachedResultName": "Eventos",
+          "cachedResultUrl": "https://airtable.com/appudbWAZ5rxdqAe4/tblJkgXvcrRW6HKxD"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id": "={{ $fromAI(\"event_record_id\", \"El ID del evento a actualizar\") }}",
+            "Miembros": "={{ [$fromAI(\"user_record_id\", \"El ID del usuario\")] }}"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": false
+            },
+            {
+              "id": "NombreEvento",
+              "displayName": "NombreEvento",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Horario",
+              "displayName": "Horario",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Miembros",
+              "displayName": "Miembros",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "array",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtableTool",
+      "typeVersion": 2.1,
+      "position": [
+        260,
+        120
+      ],
+      "id": "51ab6f60-63ea-4f81-8f5f-3088352f245c",
+      "name": "ReservaEvento",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "BbDSrWUj35Cd9sTm",
+          "name": "Airtable NameJob"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Window Buffer Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pinecone Vector Store": {
+      "ai_vectorStore": [
+        [
+          {
+            "node": "Coworking",
+            "type": "ai_vectorStore",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings OpenAI": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Pinecone Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Coworking",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Coworking": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "BuscarMiembro": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "BuscarEvento": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "ReservaEvento": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "Europe/Madrid",
+    "callerPolicy": "workflowsFromSameOwner",
+    "executionTimeout": -1
+  },
+  "versionId": "8fc9a72c-3aea-4432-9551-4a7b509c8178",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "e4fdb4e0168a7f4d35dba69787a6a0f975f7036521581508c5244ad600860eff"
+  },
+  "id": "0DZGUTF8oleLtMzb",
+  "tags": []
+}
